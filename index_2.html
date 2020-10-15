@@ -1,0 +1,98 @@
+
+            $(document).ready(function () {
+                $('#orders-box').html('');
+                showExchange();
+                showOrders();
+            });
+
+            function order() {
+                let name = $('#order-name').val();
+                let count = $('#order-count').val();
+                let address = $('#order-address').val();
+                let phone = $('#order-phone').val();
+
+                if (name == '') {
+                    alert('이름을 입력해주세요')
+                    $('#order-name').focus()
+                    return
+                } else if (count == '') {
+                    alert('수량을 입력해주세요')
+                    $('#order-count').focus()
+                    return
+                } else if (address == '') {
+                    alert('주소를 입력해주세요')
+                    $('#order-address').focus()
+                    return
+                } else if (phone == '') {
+                    alert('휴대폰번호를 입력해주세요')
+                    $('#order-phone').focus()
+                    return
+                } else if (!isCellPhone(phone)) {
+                    alert('휴대폰번호 입력 형식이 틀립니다. \n 010-0000-0000으로 입력해주세요')
+                    return
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "/order",
+                    data: {name_give: name, count_give: count, address_give: address, phone_give: phone},
+                    success: function (response) {
+                        if (response['result'] == 'success') {
+                            alert('주문 완료!');
+                            window.location.reload();
+                        }
+                    }
+                })
+            }
+
+            function isCellPhone(p) {
+                let regExp = /^(01[016789]{1}|02|0[3-9]{1}[0-9]{1})[-][0-9]{3,4}[-][0-9]{4}$/;
+                return regExp.test(p);
+            }
+
+            function showOrders() {
+                $.ajax({
+                    type: "GET",
+                    url: "/order",
+                    data: {},
+                    success: function (response) {
+                        if (response['result'] == 'success') {
+                            let orders = response['orders'];
+                            for (let i = 0; i < orders.length; i++) {
+                                makeOrderRow(orders[i]['name'], orders[i]['count'], orders[i]['address'], orders[i]['phone'])
+                            }
+                        } else {
+                            alert('주문을 받아오지 못했습니다');
+                        }
+                    }
+                })
+            }
+
+            function makeOrderRow(name, count, address, phone) {
+                let tempHtml = `<tr>\
+                                <td>${name}</td>
+                                <td>${count}</td>
+                                <td>${address}</td>
+                                <td>${phone}</td>
+                              </tr>`;
+
+                $('#orders-box').append(tempHtml);
+            }
+
+            function showExchange() {
+                $.ajax({
+                    type: "GET",
+                    url: "https://api.manana.kr/exchange/rate.json",
+                    data: {},
+                    success: function (response) {
+                        for (let i = 0; i < response.length; i++) {
+                            if (response[i]['name'] == 'USDKRW=X') {
+                                $('#exchange').text(response[i]['rate']);
+                                return;
+                            }
+                        }
+
+                    }
+                })
+            }
+
