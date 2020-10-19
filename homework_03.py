@@ -24,6 +24,6 @@ for tr in trs:
       'title': title,
       'artist': artist  # DB에는 숫자처럼 생긴 문자열 형태로 저장됩니다.
     }
-    db.trs.insert_one(doc)
+    db.trs.insert_one(doc) #파일저장
 
 
